@@ -21,14 +21,24 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Initialize a slice containing the paths to the two files. Note that the
+	// home.page.tmpl file must be the *first* file in the slice.
+	files := []string{
+		"./ui/html/home.page.gohtml",
+		"./ui/html/base.layout.gohtml",
+		"./ui/html/footer.partial.gohtml",
+	}
+
 	//w.Write([]byte("Hello from FinFollow"))
 
 	// Use the template.ParseFiles() function to read the template file into a
-	// template set. If there's an error, we log the detailed error message and
-	// the http.Error() function to send a generic 500 Internal Server Error
-	// response to the user.
-	ts, err := template.ParseFiles("./ui/html/home.page.tmpl")
+	// template set. Notice that we can pass the slice of file
+	// as a variadic parameter
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
+		// If there's an error, we log the detailed error message and
+		// the http.Error() function to send a generic 500 Internal Server Error
+		// response to the user.
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
