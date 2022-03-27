@@ -43,5 +43,10 @@ export GOOGLE_APPLICATION_CREDENTIALS="/c/Users/junio/OneDrive/Outros Documentos
 
 ## Methods
 ```
-curl -iL -x POST http://localhost:4000/assets/add
+curl -iL -X POST http://localhost:4000/assets/add 
+```
+
+TODO:
+```
+curl -iL -X POST http://localhost:4000/assets/add -H "Content-Type: application/json" -d '{"name":"test", "value": 50.4, "currency":  "USD", "custody": "FIAT", created: "2020-01-01", active: true}'
 ```
