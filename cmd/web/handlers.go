@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
+	"time"
 )
 
 // Define a home handler function to render home page
@@ -70,15 +70,14 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	// convert it to an integer using the strconv.Atoi() function. If it can't
 	// be converted to an integer, or the value is less than 1, we return a 404
 	// not found response.
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
-	if err != nil || id < 1 {
+	id := r.URL.Query().Get("id")
+	if len(id) <= 0 {
 		// http.NotFound(w, r)
 		app.notFound(w) // use the notFound helper method in helpers.go
 		return
 	}
 
-	//w.Write([]byte("SHOW asset..."))
-	fmt.Fprintf(w, "SHOW asset ID... %d", id)
+	fmt.Fprintf(w, "SHOW asset ID... %s", id)
 }
 
 // Add a addAsset handler function.
@@ -103,5 +102,25 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("ADD asset..."))
+	name := "Cardano"
+	value := float32(50.0)
+	currency := "ADA"
+	custody := "Binance"
+	created := time.Now()
+	finished, _ := time.Parse("YYYY-MM-DD", "0000-00-00")
+	active := true
+	ref, _, dbErr := app.assets.Insert(name, value, currency, custody, created, finished, active)
+
+	//log.Println(ref.Path)
+	//w.Write([]byte("SHOW asset..."))
+	if dbErr != nil {
+
+		app.serverError(w, dbErr)
+		return
+	}
+
+	// Redirect the user to the relevant page for the asset.
+	http.Redirect(w, r, fmt.Sprintf("/asset?id=%s", ref.ID), http.StatusSeeOther)
+
+	//w.Write([]byte("ADD asset..."))
 }

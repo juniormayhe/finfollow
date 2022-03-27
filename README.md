@@ -39,3 +39,8 @@ add path to environment variable
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/jsonkey"
 ```
+
+## Methods
+```
+curl -iL -x POST http://localhost:4000/assets/add
+```
