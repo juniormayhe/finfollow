@@ -38,6 +38,7 @@ go get -u firebase.google.com/go
 add path to environment variable
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/jsonkey"
+export GOOGLE_APPLICATION_CREDENTIALS="/c/Users/junio/OneDrive/Outros Documentos/finfollow-app-6341c1702a75.json"
 ```
 
 ## Methods
