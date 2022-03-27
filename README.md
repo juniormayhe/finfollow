@@ -38,5 +38,4 @@ go get -u firebase.google.com/go
 add path to environment variable
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/jsonkey"
-
 ```

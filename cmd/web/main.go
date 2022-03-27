@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
+	"juniormayhe.com/finfollow/pkg/firestoredb"
 )
 
 // Define an application struct to hold the application-wide dependencies for t
@@ -16,6 +17,7 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	assets   *firestoredb.AssetModel
 }
 
 func main() {
@@ -45,27 +47,21 @@ func main() {
 	// file name and line number.
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
 
+	client, err := openClient()
+	if err != nil {
+		errorLog.Fatalf("error initializing app: %v\n", err)
+	}
+
 	// Initialize a new instance of application containing the dependencies.
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		assets:   &firestoredb.AssetModel{Client: client},
 	}
 
-	// Use the application default credentials
-	//opt := option.WithCredentialsFile("path/to/refreshToken.json")
-	// config := &firebase.Config{ProjectID: "finfollow-app"}
-	dbApp, dbErr := firestore.NewClient(context.Background(), "finfollow-app")
-	if dbErr != nil {
-		errorLog.Fatalf("error initializing app: %v\n", dbErr)
-	}
-
-	dbApp.Collection("users").Doc("user1").Set(context.Background(), map[string]interface{}{
-		"first": "Ada",
-		"last":  "Lovelace",
-		"born":  1815,
-	})
-
-	defer dbApp.Close()
+	// We also defer a call to client.Close(), so that the connection is closed
+	// before the main() function exits
+	defer client.Close()
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields
 	// that the server uses the same network address and routes as before, and
@@ -84,8 +80,30 @@ func main() {
 	// log.Printf("Starting server on %s\n", *addr)
 	app.infoLog.Printf("Starting server on %s", *addr)
 	//err := http.ListenAndServe(*addr, mux) // this goes to standard logger instead of error logger
-	err := srv.ListenAndServe() // use struct error logger instead of standard logger
+	err = srv.ListenAndServe() // use struct error logger instead of standard logger
 
 	// log.Fatal(err)
 	errorLog.Fatal(err)
+}
+
+func openClient() (*firestore.Client, error) {
+	// Use the application default credentials from environment variables
+	client, dbErr := firestore.NewClient(context.Background(), "finfollow-app")
+	if dbErr != nil {
+		return nil, dbErr
+	}
+
+	// client.Collection("users").Doc("user1").Set(context.Background(), map[string]interface{}{
+	// 	"first": "Ada",
+	// 	"last":  "Lovelace",
+	// 	"born":  1815,
+	// })
+
+	// client.Collection("users").Add(context.Background(), map[string]interface{}{
+	// 	"first": "Julia",
+	// 	"last":  "Sanchez",
+	// 	"born":  2017,
+	// })
+
+	return client, nil
 }
