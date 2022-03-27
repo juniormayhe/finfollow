@@ -7,6 +7,14 @@ import (
 	"os"
 )
 
+// Define an application struct to hold the application-wide dependencies for t
+// web application. For now we'll only include fields for the two custom logger
+// we'll add more to it as the build progresses.
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 
 	// Define a new command-line flag with the name 'addr', a default value of
@@ -34,22 +42,11 @@ func main() {
 	// file name and line number.
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.LUTC|log.Llongfile)
 
-	// Use the http.NewServeMux() function to initialize a new servemux, then
-	// register the home function as the handler for the "/" URL pattern.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/asset", showAsset)
-	mux.HandleFunc("/asset/add", addAsset)
-
-	// Create a file server which serves files out of the "./ui/static" directo
-	// Note that the path given to the http.Dir function is relative to the pro
-	// directory root.
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-
-	// Use the mux.Handle() function to register the file server as the handler
-	// all URL paths that start with "/static/". For matching paths, we strip the
-	// "/static" prefix before the request reaches the file server.
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	// Initialize a new instance of application containing the dependencies.
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields
 	// that the server uses the same network address and routes as before, and
@@ -58,7 +55,7 @@ func main() {
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routes(), // gets ServeMux from routes()
 	}
 
 	// Use the http.ListenAndServe() function to start a new web server. We pas
@@ -66,7 +63,7 @@ func main() {
 	// and the servemux we just created. If http.ListenAndServe() returns an er
 	// we use the log.Fatal() function to log the error message and exit.
 	// log.Printf("Starting server on %s\n", *addr)
-	infoLog.Printf("Starting server on %s", *addr)
+	app.infoLog.Printf("Starting server on %s", *addr)
 	//err := http.ListenAndServe(*addr, mux) // this goes to standard logger instead of error logger
 	err := srv.ListenAndServe() // use struct error logger instead of standard logger
 

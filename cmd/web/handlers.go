@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
-// Define a home handler function which writes a byte slice containing
-// "Hello from FinFollow" as the response body.
-func home(w http.ResponseWriter, r *http.Request) {
+// Define a home handler function to render home page
+// we inject dependencies into handler passing the application struct value
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Check if the current request URL path exactly matches "/". If it doesn't
 	// the http.NotFound() function to send a 404 response to the client.
 
@@ -39,8 +38,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// If there's an error, we log the detailed error message and
 		// the http.Error() function to send a generic 500 Internal Server Error
 		// response to the user.
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		// log.Println(err.Error())
+		// Because the home handler function is now a method against application
+		// it can access its fields, including the error logger. We'll write the
+		// message to this instead of the standard logger.
+		// app.errorLog.Println(err.Error())
+		// http.Error(w, "Internal Server Error", 500)
+
+		app.serverError(w, err) // this is our helper method in helpers.go
 		return
 	}
 
@@ -49,21 +54,26 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// dynamic data that we want to pass in, which for now we'll leave as nil.
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		// log.Println(err.Error())
+		// Also update the code here to use the error logger from the applicatio
+		// struct.
+		// app.errorLog.Println(err.Error())
+		// http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 	}
 
 }
 
 // Add a showAsset handler function.
-func showAsset(w http.ResponseWriter, r *http.Request) {
+func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	// Extract the value of the id parameter from the query string and try to
 	// convert it to an integer using the strconv.Atoi() function. If it can't
 	// be converted to an integer, or the value is less than 1, we return a 404
 	// not found response.
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		// http.NotFound(w, r)
+		app.notFound(w) // use the notFound helper method in helpers.go
 		return
 	}
 
@@ -73,7 +83,7 @@ func showAsset(w http.ResponseWriter, r *http.Request) {
 
 // Add a addAsset handler function.
 // test it: curl -i -X POST http://localhost:4000/asset/add -d "name=test&description=test"
-func addAsset(w http.ResponseWriter, r *http.Request) {
+func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// Use r.Method to check whether the request is using POST or not.
 	// If it's not, use the w.WriteHeader() method to send a 405 status code and
 	// the w.Write() method to write a "Method Not Allowed" response body. We
@@ -88,7 +98,8 @@ func addAsset(w http.ResponseWriter, r *http.Request) {
 
 		// w.WriteHeader(405)
 		// w.Write([]byte("Method Not Allowed"))
-		http.Error(w, "Method Not Allowed", 405)
+		// http.Error(w, "Method Not Allowed", 405)
+		app.clientError(w, http.StatusMethodNotAllowed) // use the clientError helper method in helpers.go
 		return
 	}
 
