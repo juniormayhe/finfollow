@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+
+	"cloud.google.com/go/firestore"
 )
 
 // Define an application struct to hold the application-wide dependencies for t
@@ -47,6 +50,22 @@ func main() {
 		errorLog: errorLog,
 		infoLog:  infoLog,
 	}
+
+	// Use the application default credentials
+	//opt := option.WithCredentialsFile("path/to/refreshToken.json")
+	// config := &firebase.Config{ProjectID: "finfollow-app"}
+	dbApp, dbErr := firestore.NewClient(context.Background(), "finfollow-app")
+	if dbErr != nil {
+		errorLog.Fatalf("error initializing app: %v\n", dbErr)
+	}
+
+	dbApp.Collection("users").Doc("user1").Set(context.Background(), map[string]interface{}{
+		"first": "Ada",
+		"last":  "Lovelace",
+		"born":  1815,
+	})
+
+	defer dbApp.Close()
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields
 	// that the server uses the same network address and routes as before, and
