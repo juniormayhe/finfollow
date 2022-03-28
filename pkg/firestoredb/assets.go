@@ -3,6 +3,7 @@ package firestoredb
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -36,6 +37,11 @@ func (m *AssetModel) Insert(name string, value float32, currency string, custody
 // This will return a specific asset based on its id.
 func (m *AssetModel) Get(id string) (*models.Asset, error) {
 	ds, err := m.Client.Collection("assets").Doc(id).Get(context.Background())
+
+	// return our own models.ErrNoRecord error if no document was found
+	if err != nil && strings.Contains(err.Error(), "NotFound") {
+		return nil, models.ErrNoRecord
+	}
 
 	// Initialize a pointer to a new zeroed Snippet struct.
 	asset := &models.Asset{}

@@ -77,13 +77,14 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "asset ID... %s\n", id)
 	asset, err := app.assets.Get(id)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-	fmt.Fprintf(w, "\nasset name... %s", asset.Name)
+
+	fmt.Fprintf(w, "\nasset = %+v", asset)
+
 }
 
 // Add a addAsset handler function.
