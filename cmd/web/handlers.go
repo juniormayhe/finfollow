@@ -77,7 +77,13 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "SHOW asset ID... %s", id)
+	fmt.Fprintf(w, "asset ID... %s\n", id)
+	asset, err := app.assets.Get(id)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	fmt.Fprintf(w, "\nasset name... %s", asset.Name)
 }
 
 // Add a addAsset handler function.
@@ -109,7 +115,7 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	created := time.Now()
 	finished, _ := time.Parse("YYYY-MM-DD", "0000-00-00")
 	active := true
-	ref, _, dbErr := app.assets.Insert(name, value, currency, custody, created, finished, active)
+	id, dbErr := app.assets.Insert(name, value, currency, custody, created, finished, active)
 
 	//log.Println(ref.Path)
 	//w.Write([]byte("SHOW asset..."))
@@ -120,7 +126,7 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect the user to the relevant page for the asset.
-	http.Redirect(w, r, fmt.Sprintf("/asset?id=%s", ref.ID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/asset?id=%s", id), http.StatusSeeOther)
 
 	//w.Write([]byte("ADD asset..."))
 }

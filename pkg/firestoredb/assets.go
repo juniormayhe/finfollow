@@ -2,6 +2,7 @@ package firestoredb
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -14,18 +15,9 @@ type AssetModel struct {
 }
 
 // This will insert a new asset into the database.
-func (m *AssetModel) Insert(name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (*firestore.DocumentRef, *firestore.WriteResult, error) {
+func (m *AssetModel) Insert(name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
 
-	/*
-		Name     string
-		Value    float32
-		Currency string
-		Custody  string
-		Created  time.Time
-		Finished time.Time
-		Active   bool
-	*/
-	docRef, result, err := m.Client.Collection("assets").Add(context.Background(), map[string]interface{}{
+	docRef, _, err := m.Client.Collection("assets").Add(context.Background(), map[string]interface{}{
 		"name":     name,
 		"value":    value,
 		"currency": currency,
@@ -35,15 +27,23 @@ func (m *AssetModel) Insert(name string, value float32, currency string, custody
 		"active":   active,
 	})
 	if err != nil {
-		return nil, nil, err
+		return "", err
 	}
 
-	return docRef, result, nil
+	return docRef.ID, nil
 }
 
 // This will return a specific asset based on its id.
-func (m *AssetModel) Get(id int) (*models.Asset, error) {
-	return nil, nil
+func (m *AssetModel) Get(id string) (*models.Asset, error) {
+	ds, err := m.Client.Collection("assets").Doc(id).Get(context.Background())
+
+	// Initialize a pointer to a new zeroed Snippet struct.
+	asset := &models.Asset{}
+	ds.DataTo(&asset)
+
+	log.Printf("asset.Name: %s", asset.Name)
+
+	return asset, err
 }
 
 // This will return the 10 most recently created assets.
