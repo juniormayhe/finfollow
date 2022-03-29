@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"time"
+
+	"juniormayhe.com/finfollow/pkg/models"
 )
 
 // Define a home handler function to render home page
@@ -78,7 +80,12 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	asset, err := app.assets.Get(id)
+
 	if err != nil {
+		if err == models.ErrNoRecord {
+			app.notFound(w)
+			return
+		}
 		app.serverError(w, err)
 		return
 	}
