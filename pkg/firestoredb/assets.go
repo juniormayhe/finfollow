@@ -7,16 +7,12 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 	"juniormayhe.com/finfollow/pkg/models"
 )
 
-// define a struct to wrap the firestore client
-type AssetModel struct {
-	Client *firestore.Client
-}
-
 // This will insert a new asset into the database.
-func (m *AssetModel) Insert(name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
+func (m *FirestoreModel) Insert(name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
 
 	docRef, _, err := m.Client.Collection("assets").Add(context.Background(), map[string]interface{}{
 		"name":     name,
@@ -35,7 +31,7 @@ func (m *AssetModel) Insert(name string, value float32, currency string, custody
 }
 
 // This will return a specific asset based on its id.
-func (m *AssetModel) Get(id string) (*models.Asset, error) {
+func (m *FirestoreModel) Get(id string) (*models.Asset, error) {
 	ds, err := m.Client.Collection("assets").Doc(id).Get(context.Background())
 
 	// return our own models.ErrNoRecord error if no document was found
@@ -53,6 +49,33 @@ func (m *AssetModel) Get(id string) (*models.Asset, error) {
 }
 
 // This will return the 10 most recently created assets.
-func (m *AssetModel) Latest() ([]*models.Asset, error) {
-	return nil, nil
+func (m *FirestoreModel) Latest() ([]*models.Asset, error) {
+	// Initialize an empty slice to hold the models.Asset objects.
+	assets := []*models.Asset{}
+	iter := m.Client.Collection("assets").Query.OrderBy("created", firestore.Desc).Limit(10).Documents(context.Background())
+	for {
+		// Use iter.Next to iterate through the docs in the DocumentIterator.
+		ds, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		asset := &models.Asset{}
+		ds.DataTo(&asset)
+		assets = append(assets, asset)
+	}
+
+	return assets, nil
+}
+
+func Sum(assets []*models.Asset) float32 {
+	sum := float32(0)
+	for _, asset := range assets {
+		sum += asset.Value
+	}
+	return sum
 }

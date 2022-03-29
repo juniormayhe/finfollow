@@ -17,7 +17,7 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
-	assets   *firestoredb.AssetModel
+	model    *firestoredb.FirestoreModel
 }
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
-		assets:   &firestoredb.AssetModel{Client: client},
+		model:    &firestoredb.FirestoreModel{Client: client},
 	}
 
 	// We also defer a call to client.Close(), so that the connection is closed

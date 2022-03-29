@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"time"
 
@@ -16,53 +15,62 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// the http.NotFound() function to send a 404 response to the client.
 
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.notFound(w)
 		// Importantly, we then return from the handler. If we don't return the hand
 		// would keep executing and also write the "Hello from SnippetBox" message.
 		return
 	}
 
+	assets, err := app.model.Latest()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	for _, asset := range assets {
+		fmt.Fprintf(w, "%+v\n", asset)
+	}
+
 	// Initialize a slice containing the paths to the two files. Note that the
 	// home.page.tmpl file must be the *first* file in the slice.
-	files := []string{
-		"./ui/html/home.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
+	// files := []string{
+	// 	"./ui/html/home.page.gohtml",
+	// 	"./ui/html/base.layout.gohtml",
+	// 	"./ui/html/footer.partial.gohtml",
+	// }
 
 	//w.Write([]byte("Hello from FinFollow"))
 
 	// Use the template.ParseFiles() function to read the template file into a
 	// template set. Notice that we can pass the slice of file
 	// as a variadic parameter
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		// If there's an error, we log the detailed error message and
-		// the http.Error() function to send a generic 500 Internal Server Error
-		// response to the user.
-		// log.Println(err.Error())
-		// Because the home handler function is now a method against application
-		// it can access its fields, including the error logger. We'll write the
-		// message to this instead of the standard logger.
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// If there's an error, we log the detailed error message and
+	// the http.Error() function to send a generic 500 Internal Server Error
+	// response to the user.
+	// log.Println(err.Error())
+	// Because the home handler function is now a method against application
+	// it can access its fields, including the error logger. We'll write the
+	// message to this instead of the standard logger.
+	// app.errorLog.Println(err.Error())
+	// http.Error(w, "Internal Server Error", 500)
 
-		app.serverError(w, err) // this is our helper method in helpers.go
-		return
-	}
+	// app.serverError(w, err) // this is our helper method in helpers.go
+	// return
+	//}
 
 	// We then use the Execute() method on the template set to write the template
 	// content as the response body. The last parameter to Execute() represents
 	// dynamic data that we want to pass in, which for now we'll leave as nil.
-	err = ts.Execute(w, nil)
-	if err != nil {
-		// log.Println(err.Error())
-		// Also update the code here to use the error logger from the applicatio
-		// struct.
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
-		app.serverError(w, err)
-	}
+	// err = ts.Execute(w, nil)
+	// if err != nil {
+	// log.Println(err.Error())
+	// Also update the code here to use the error logger from the applicatio
+	// struct.
+	// app.errorLog.Println(err.Error())
+	// http.Error(w, "Internal Server Error", 500)
+	// 	app.serverError(w, err)
+	// }
 
 }
 
@@ -79,7 +87,7 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	asset, err := app.assets.Get(id)
+	asset, err := app.model.Get(id)
 
 	if err != nil {
 		if err == models.ErrNoRecord {
@@ -117,19 +125,24 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := "Cardano"
-	value := float32(50.0)
+	value := float32(20.1)
 	currency := "ADA"
 	custody := "Binance"
 	created := time.Now()
-	finished, _ := time.Parse("YYYY-MM-DD", "0000-00-00")
+	finished, _ := time.Parse("YYYY-MM-DD", "1980-01-01")
 	active := true
-	id, dbErr := app.assets.Insert(name, value, currency, custody, created, finished, active)
+	id, dbErr := app.model.Insert(name, value, currency, custody, created, finished, active)
 
 	//log.Println(ref.Path)
 	//w.Write([]byte("SHOW asset..."))
 	if dbErr != nil {
-
 		app.serverError(w, dbErr)
+		return
+	}
+	app.infoLog.Printf("Added asset with id = %s", id)
+	_, balanceErr := app.model.UpdateBalance("wander", value)
+	if balanceErr != nil {
+		app.serverError(w, balanceErr)
 		return
 	}
 

@@ -16,3 +16,7 @@ type Asset struct {
 	Finished time.Time
 	Active   bool
 }
+
+type Balance struct {
+	Value float32
+}
