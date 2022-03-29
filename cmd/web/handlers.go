@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"text/template"
 	"time"
 
 	"juniormayhe.com/finfollow/pkg/models"
@@ -96,6 +97,28 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		}
 		app.serverError(w, err)
 		return
+	}
+
+	// Initialize a slice containing the paths to the show.page.tmpl file,
+	// plus the base layout and footer partial that we made earlier.
+	files := []string{
+		"./ui/html/show.page.gohtml",
+
+		"./ui/html/base.layout.gohtml",
+		"./ui/html/footer.partial.gohtml",
+	}
+
+	// Parse the template files...
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	// And then execute them. Notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter.
+	err = ts.Execute(w, asset)
+	if err != nil {
+		app.serverError(w, err)
 	}
 
 	fmt.Fprintf(w, "\nasset = %+v", asset)

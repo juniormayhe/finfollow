@@ -1,0 +1,23 @@
+{{template "base" .}}
+
+{{define "title"}}Asset {{.Name}}{{end}}
+
+{{define "body"}}
+    
+    <div class='snippet'>
+        <div class='metadata'>
+            <strong>Balance: {{.Currency}} {{.Value}}</strong>
+        </div>
+        <pre><code>Custody: {{.Custody}}</code></pre>
+        <div class='metadata'>
+            <time>Created: {{.Created}}</time>
+        </div>
+        <div class='metadata'>
+            <time>Finished: {{.Finished}}</time>
+        </div>
+        <div class='metadata'>
+            <span>Active: {{.Active}}</span>
+        </div>
+    </div>
+
+{{end}}
