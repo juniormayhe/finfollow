@@ -9,7 +9,7 @@ import (
 	"juniormayhe.com/finfollow/pkg/models"
 )
 
-// This will insert a new asset into the database.
+// This update user balance in database
 func (m *FirestoreModel) UpdateBalance(username string, value float32) (bool, error) {
 
 	balance, err := m.GetBalance(username)
