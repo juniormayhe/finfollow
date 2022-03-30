@@ -22,7 +22,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assets, err := app.model.Latest()
+	assets, err := app.model.Latest("wander")
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -93,7 +93,7 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	asset, err := app.model.Get(id)
+	asset, err := app.model.Get("wander", id)
 
 	if err != nil {
 		if err == models.ErrNoRecord {
@@ -130,7 +130,7 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 	}
 
-	fmt.Fprintf(w, "\nasset = %+v", asset)
+	app.infoLog.Printf("asset = %+v", asset)
 
 }
 
@@ -157,15 +157,14 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := "Cardano"
-	value := float32(20.1)
+	value := float32(520)
 	currency := "ADA"
 	custody := "Binance"
 	created := time.Now()
 	finished, _ := time.Parse("YYYY-MM-DD", "1980-01-01")
 	active := true
-	id, dbErr := app.model.Insert(name, value, currency, custody, created, finished, active)
+	id, dbErr := app.model.Insert("wander", name, value, currency, custody, created, finished, active)
 
-	//log.Println(ref.Path)
 	//w.Write([]byte("SHOW asset..."))
 	if dbErr != nil {
 		app.serverError(w, dbErr)
@@ -179,7 +178,7 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect the user to the relevant page for the asset.
-	http.Redirect(w, r, fmt.Sprintf("/asset?id=%s", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/asset?id=%v", id), http.StatusSeeOther)
 
 	//w.Write([]byte("ADD asset..."))
 }

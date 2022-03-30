@@ -12,9 +12,9 @@ import (
 )
 
 // This will insert a new asset into the database.
-func (m *FirestoreModel) Insert(name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
+func (m *FirestoreModel) Insert(username string, name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
 
-	docRef, _, err := m.Client.Collection("assets").Add(context.Background(), map[string]interface{}{
+	docRef, _, err := m.Client.Collection("accounts").Doc(username).Collection("assets").Add(context.Background(), map[string]interface{}{
 		"name":     name,
 		"value":    value,
 		"currency": currency,
@@ -23,6 +23,7 @@ func (m *FirestoreModel) Insert(name string, value float32, currency string, cus
 		"finished": finished,
 		"active":   active,
 	})
+
 	if err != nil {
 		return "", err
 	}
@@ -31,8 +32,8 @@ func (m *FirestoreModel) Insert(name string, value float32, currency string, cus
 }
 
 // This will return a specific asset based on its id.
-func (m *FirestoreModel) Get(id string) (*models.Asset, error) {
-	ds, err := m.Client.Collection("assets").Doc(id).Get(context.Background())
+func (m *FirestoreModel) Get(username string, id string) (*models.Asset, error) {
+	ds, err := m.Client.Collection("accounts").Doc(username).Collection("assets").Doc(id).Get(context.Background())
 
 	// return our own models.ErrNoRecord error if no document was found
 	if err != nil && strings.Contains(err.Error(), "NotFound") {
@@ -50,10 +51,10 @@ func (m *FirestoreModel) Get(id string) (*models.Asset, error) {
 }
 
 // This will return the 10 most recently created assets.
-func (m *FirestoreModel) Latest() ([]*models.Asset, error) {
+func (m *FirestoreModel) Latest(username string) ([]*models.Asset, error) {
 	// Initialize an empty slice to hold the models.Asset objects.
 	assets := []*models.Asset{}
-	iter := m.Client.Collection("assets").Query.OrderBy("created", firestore.Desc).Limit(10).Documents(context.Background())
+	iter := m.Client.Collection("accounts").Doc(username).Collection("assets").Query.OrderBy("created", firestore.Desc).Limit(10).Documents(context.Background())
 	for {
 		// Use iter.Next to iterate through the docs in the DocumentIterator.
 		ds, err := iter.Next()
