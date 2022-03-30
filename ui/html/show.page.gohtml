@@ -11,10 +11,10 @@
         </div>
         <pre><code>Custody: {{.Custody}}</code></pre>
         <div class='metadata'>
-            <time>Created: {{.Created}}</time>
+            <time>Created: {{.Created | humanDate}}</time>
         </div>
         <div class='metadata'>
-            <time>Finished: {{.Finished}}</time>
+            <time>Finished: {{.Finished | humanDate}}</time>
         </div>
         <div class='metadata'>
             <span>Active: {{.Active}}</span>
