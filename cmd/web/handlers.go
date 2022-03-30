@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"text/template"
 	"time"
 
 	"juniormayhe.com/finfollow/pkg/models"
@@ -38,45 +37,48 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	// Initialize a slice containing the paths to the two files. Note that the
 	// home.page.tmpl file must be the *first* file in the slice.
-	files := []string{
-		"./ui/html/home.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
+	// files := []string{
+	// 	"./ui/html/home.page.gohtml",
+	// 	"./ui/html/base.layout.gohtml",
+	// 	"./ui/html/footer.partial.gohtml",
+	// }
 
 	//w.Write([]byte("Hello from FinFollow"))
 
 	// Use the template.ParseFiles() function to read the template file into a
 	// template set. Notice that we can pass the slice of file
 	// as a variadic parameter
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		// If there's an error, we log the detailed error message and
-		// the http.Error() function to send a generic 500 Internal Server Error
-		// response to the user.
-		// log.Println(err.Error())
-		// Because the home handler function is now a method against application
-		// it can access its fields, including the error logger. We'll write the
-		// message to this instead of the standard logger.
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	// If there's an error, we log the detailed error message and
+	// the http.Error() function to send a generic 500 Internal Server Error
+	// response to the user.
+	// log.Println(err.Error())
+	// Because the home handler function is now a method against application
+	// it can access its fields, including the error logger. We'll write the
+	// message to this instead of the standard logger.
+	// app.errorLog.Println(err.Error())
+	// http.Error(w, "Internal Server Error", 500)
 
-		app.serverError(w, err) // this is our helper method in helpers.go
-		return
-	}
+	//	app.serverError(w, err) // this is our helper method in helpers.go
+	//	return
+	//}
 
 	// We then use the Execute() method on the template set to write the template
 	// content as the response body. The last parameter to Execute() represents
 	// dynamic data that we want to pass in, which for now we'll leave as nil.
-	err = ts.Execute(w, data)
-	if err != nil {
-		// log.Println(err.Error())
-		// Also update the code here to use the error logger from the applicatio
-		// struct.
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
-		app.serverError(w, err)
-	}
+	//err = ts.Execute(w, data)
+	// if err != nil {
+	// log.Println(err.Error())
+	// Also update the code here to use the error logger from the applicatio
+	// struct.
+	// app.errorLog.Println(err.Error())
+	// http.Error(w, "Internal Server Error", 500)
+
+	//	app.serverError(w, err)
+	//}
+
+	app.renderTemplate(w, r, "home.page.gohtml", data)
 
 }
 
@@ -108,27 +110,30 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 
 	// Initialize a slice containing the paths to the show.page.tmpl file,
 	// plus the base layout and footer partial that we made earlier.
-	files := []string{
-		"./ui/html/show.page.gohtml",
+	// files := []string{
+	// 	"./ui/html/show.page.gohtml",
 
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
+	// 	"./ui/html/base.layout.gohtml",
+	// 	"./ui/html/footer.partial.gohtml",
+	// }
 
 	// Parse the template files...
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// 	return
+	// }
 	// And then execute them. Notice how we are passing in the snippet
 	// data (a models.Snippet struct) as the final parameter.
 	// err = ts.Execute(w, asset)
 	// Pass in the templateData struct when executing the template.
-	err = ts.Execute(w, data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	// err = ts.Execute(w, data)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+
+	// Use the new render helper.
+	app.renderTemplate(w, r, "show.page.gohtml", data)
 
 	app.infoLog.Printf("asset = %+v", asset)
 
@@ -156,10 +161,10 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := "Cardano"
-	value := float32(520)
-	currency := "ADA"
-	custody := "Binance"
+	name := "Polygon"
+	value := float32(8.2)
+	currency := "MATIC"
+	custody := "Metamask"
 	created := time.Now()
 	finished, _ := time.Parse("YYYY-MM-DD", "1980-01-01")
 	active := true

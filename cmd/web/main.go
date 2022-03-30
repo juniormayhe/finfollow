@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -15,9 +16,10 @@ import (
 // web application. For now we'll only include fields for the two custom logger
 // we'll add more to it as the build progresses.
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	model    *firestoredb.FirestoreModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	model         *firestoredb.FirestoreModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -52,11 +54,18 @@ func main() {
 		errorLog.Fatalf("error initializing app: %v\n", err)
 	}
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Initialize a new instance of application containing the dependencies.
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		model:    &firestoredb.FirestoreModel{Client: client},
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		model:         &firestoredb.FirestoreModel{Client: client},
+		templateCache: templateCache,
 	}
 
 	// We also defer a call to client.Close(), so that the connection is closed
