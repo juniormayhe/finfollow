@@ -5,6 +5,22 @@
 {{define "body"}}
     
     <h2>Portfolio</h2>
-    <p>There's nothing to see here yet!</p>
+    {{if .Assets}}
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
 
+        {{range .Assets}}
+        <tr>
+            <td><a href='/asset?id={{.Name}}'>{{.Name}}</a></td>
+            <td>{{.Currency}} {{.Value}}</td>
+        </tr>
+        {{end}}
+    </table>
+
+    {{else}}
+        <p>There's nothing to see here yet!</p>
+    {{end}}
 {{end}}

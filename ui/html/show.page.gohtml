@@ -1,9 +1,9 @@
 {{template "base" .}}
 
-{{define "title"}}Asset {{.Name}}{{end}}
+{{define "title"}}Asset {{.Asset.Name}}{{end}}
 
 {{define "body"}}
-    
+    {{with .Asset}}
     <div class='snippet'>
         <div class='metadata'>
             <strong>Balance: {{.Currency}} {{.Value}}</strong>
@@ -19,5 +19,5 @@
             <span>Active: {{.Active}}</span>
         </div>
     </div>
-
+    {{end}}
 {{end}}
