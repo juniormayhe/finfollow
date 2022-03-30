@@ -41,9 +41,10 @@ func (m *FirestoreModel) Get(id string) (*models.Asset, error) {
 
 	// Initialize a pointer to a new zeroed Snippet struct.
 	asset := &models.Asset{}
+	asset.Id = ds.Ref.ID
 	ds.DataTo(&asset)
 
-	log.Printf("asset.Name: %s", asset.Name)
+	log.Printf("asset: %+v", asset)
 
 	return asset, err
 }
@@ -65,6 +66,7 @@ func (m *FirestoreModel) Latest() ([]*models.Asset, error) {
 		}
 
 		asset := &models.Asset{}
+		asset.Id = ds.Ref.ID
 		ds.DataTo(&asset)
 		assets = append(assets, asset)
 	}

@@ -8,6 +8,7 @@ import (
 var ErrNoRecord = errors.New("models: no matching record found")
 
 type Asset struct {
+	Id       string
 	Name     string
 	Value    float32
 	Currency string
