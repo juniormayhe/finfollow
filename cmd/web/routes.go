@@ -1,10 +1,19 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/justinas/alice" // package to create composable middleware
+)
 
 //func (app *application) routes() *http.ServeMux {
 // use http.Handler instead of *http.ServeMux.
 func (app *application) routes() http.Handler {
+
+	// Create a middleware chain with justinas/alice
+	// containing our 'standard' middleware
+	// which will be used for every request our application receives.
+	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
@@ -32,5 +41,12 @@ func (app *application) routes() http.Handler {
 	// return secureHeaders(mux)
 
 	// Wrap the existing chain with the logRequest middleware.
-	return app.logRequest(secureHeaders(mux))
+	// return app.logRequest(secureHeaders(mux))
+
+	// Wrap the existing chain with the recoverPanic middleware.
+	// return app.recoverPanic(app.logRequest(secureHeaders(mux)))
+
+	// Return the 'standard' middleware chain
+	// followed by the servemux.
+	return standardMiddleware.Then(mux)
 }

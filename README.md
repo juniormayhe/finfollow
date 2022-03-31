@@ -27,6 +27,11 @@ or update
 go get -u firebase.google.com/go
 ```
 
+Composable middleware
+```
+go get github.com/justinas/alice
+```
+
 ## Create Google service account
 
 [Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)
