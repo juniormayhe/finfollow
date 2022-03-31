@@ -147,7 +147,8 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 
 // Add a new createSnippetForm handler, which for now returns a placeholder res
 func (app *application) addAssetForm(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Create a new asset..."))
+	//w.Write([]byte("Create a new asset..."))
+	app.renderTemplate(w, r, "create.page.gohtml", nil)
 }
 
 // Add a addAsset handler function.

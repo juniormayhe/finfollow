@@ -1,0 +1,30 @@
+{{template "base" .}}
+{{define "title"}}Add an asset {{end}}
+{{define "body"}}
+<form action='/asset/add' method='POST'>
+    <div>
+        <label>Name:</label>
+        <input type='text' name='name'>
+    </div>
+    <div>
+        <label>Value:</label>
+        <input type='number' name='name'>
+    </div>
+    <div>
+        <label>Currency:</label>
+        <input type='text' name='currency'>
+    </div>
+    <div>
+        <label>Custody:</label>
+        <input type='text' name='custody'>
+    </div>
+    <div>
+        <label>Active:</label>
+        <input type='radio' name='active' id='active' value='1' checked> <label for='active'>True</label>
+        <input type='radio' name='active' id='inactive' value='0'> <label for='inactive'>False</label>
+    </div>
+    <div>
+        <input type='submit' value='Add asset'>
+    </div>
+</form>
+{{end}}

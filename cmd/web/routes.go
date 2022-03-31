@@ -26,8 +26,8 @@ func (app *application) routes() http.Handler {
 	// and doesn't support clean URLs, we need to use a custom router
 	mux := pat.New()
 	mux.Get("/", http.HandlerFunc(app.home))
-	mux.Get("/asset/create", http.HandlerFunc(app.addAssetForm))
-	mux.Post("/asset/create", http.HandlerFunc(app.addAsset))
+	mux.Get("/asset/add", http.HandlerFunc(app.addAssetForm))
+	mux.Post("/asset/add", http.HandlerFunc(app.addAsset))
 	mux.Get("/asset/:id", http.HandlerFunc(app.showAsset)) // Moved down to give preference to exact match route before wildcard route
 
 	// Create a file server which serves files out of the "./ui/static" directo
