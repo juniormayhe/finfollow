@@ -32,6 +32,15 @@ Composable middleware
 go get github.com/justinas/alice
 ```
 
+Router to deal with method based routing and clean urls, not maintained. We could use others like
+- https://github.com/go-zoo/bone
+- https://github.com/go-chi/chi
+- https://github.com/gorilla/mux
+- 
+```
+go get github.com/bmizerany/pat
+```
+
 ## Create Google service account
 
 [Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)

@@ -14,7 +14,9 @@
 
         {{range .Assets}}
         <tr>
-            <td><a href='/asset?id={{.Id}}'>{{.Name}}</a></td>
+            {{/* <td><a href='/asset?id={{.Id}}'>{{.Name}}</a></td> */}}
+            <!-- Use the new clean URL style-->
+            <td><a href='/asset/{{.Id}}'>{{.Name}}</a></td>
             <td>{{.Currency}} {{.Value}}</td>
         </tr>
         {{end}}

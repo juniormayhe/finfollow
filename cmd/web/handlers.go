@@ -13,13 +13,14 @@ import (
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Check if the current request URL path exactly matches "/". If it doesn't
 	// the http.NotFound() function to send a 404 response to the client.
-
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		// Importantly, we then return from the handler. If we don't return the hand
-		// would keep executing and also write the "Hello from SnippetBox" message.
-		return
-	}
+	// Because Pat matches the "/" path exactly, we can now remove the manual c
+	// of r.URL.Path != "/" from this handler.
+	// if r.URL.Path != "/" {
+	// 	app.notFound(w)
+	// 	// Importantly, we then return from the handler. If we don't return the hand
+	// 	// would keep executing and also write the "Hello from SnippetBox" message.
+	// 	return
+	// }
 
 	assets, err := app.model.Latest("wander")
 	if err != nil {
@@ -88,7 +89,12 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	// convert it to an integer using the strconv.Atoi() function. If it can't
 	// be converted to an integer, or the value is less than 1, we return a 404
 	// not found response.
-	id := r.URL.Query().Get("id")
+	// id := r.URL.Query().Get("id")
+
+	// Pat doesn't strip the colon from the named capture key, so we need to
+	// get the value of the named capture ":id" from the
+	// query string instead of "id".
+	id := r.URL.Query().Get(":id")
 	if len(id) <= 0 {
 		// http.NotFound(w, r)
 		app.notFound(w) // use the notFound helper method in helpers.go
@@ -139,6 +145,11 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Add a new createSnippetForm handler, which for now returns a placeholder res
+func (app *application) addAssetForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Create a new asset..."))
+}
+
 // Add a addAsset handler function.
 // test it: curl -i -X POST http://localhost:4000/asset/add -d "name=test&description=test"
 func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
@@ -146,20 +157,21 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// If it's not, use the w.WriteHeader() method to send a 405 status code and
 	// the w.Write() method to write a "Method Not Allowed" response body. We
 	// then return from the function so that the subsequent code is not executed
-	if r.Method != "POST" {
+	// With Pat the check of r.Method != "POST" is now superfluous
+	// and can be removed.
+	// if r.Method != "POST" {
+	// 	// If user is using wrong method, let user know POST is the only method allowed:
+	// 	// Use the Header().Set() method to add an 'Allow: POST' header to the
+	// 	// response header map. The first parameter is the header name, and
+	// 	// the second parameter is the header value.
+	// 	w.Header().Set("Allow", "POST")
 
-		// If user is using wrong method, let user know POST is the only method allowed:
-		// Use the Header().Set() method to add an 'Allow: POST' header to the
-		// response header map. The first parameter is the header name, and
-		// the second parameter is the header value.
-		w.Header().Set("Allow", "POST")
-
-		// w.WriteHeader(405)
-		// w.Write([]byte("Method Not Allowed"))
-		// http.Error(w, "Method Not Allowed", 405)
-		app.clientError(w, http.StatusMethodNotAllowed) // use the clientError helper method in helpers.go
-		return
-	}
+	// 	// w.WriteHeader(405)
+	// 	// w.Write([]byte("Method Not Allowed"))
+	// 	// http.Error(w, "Method Not Allowed", 405)
+	// 	app.clientError(w, http.StatusMethodNotAllowed) // use the clientError helper method in helpers.go
+	// 	return
+	// }
 
 	name := "Polygon"
 	value := float32(8.2)
@@ -182,8 +194,11 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect the user to the relevant page for the asset.
-	http.Redirect(w, r, fmt.Sprintf("/asset?id=%v", id), http.StatusSeeOther)
+	// w.Write([]byte("ADD asset..."))
 
-	//w.Write([]byte("ADD asset..."))
+	// Redirect the user to the relevant page for the asset.
+	// http.Redirect(w, r, fmt.Sprintf("/asset?id=%v", id), http.StatusSeeOther)
+
+	// Change the redirect to use the new semantic URL style of /snippet/:id
+	http.Redirect(w, r, fmt.Sprintf("/asset/%s", id), http.StatusSeeOther)
 }
