@@ -2,10 +2,10 @@ package main
 
 import (
 	"html/template"
-	"net/url"
 	"path/filepath"
 	"time"
 
+	"juniormayhe.com/finfollow/pkg/forms"
 	"juniormayhe.com/finfollow/pkg/models"
 )
 
@@ -15,11 +15,12 @@ import (
 // to it as the build progresses.
 type templateData struct {
 	CurrentYear int
-	Now         string            // date in YYYY-MM-DD format
-	FormData    url.Values        // render previously submitted data. url.Values has the same underlying type of r.PostForm
-	FormErrors  map[string]string // to hold any validation errors to render in page
-	Asset       *models.Asset
-	Assets      []*models.Asset
+	Now         string // date in YYYY-MM-DD format
+	Form        *forms.Form
+	//FormData    url.Values        // render previously submitted data. url.Values has the same underlying type of r.PostForm
+	//FormErrors  map[string]string // to hold any validation errors to render in page
+	Asset  *models.Asset
+	Assets []*models.Asset
 }
 
 // Create a humanDate function which returns a nicely formatted string

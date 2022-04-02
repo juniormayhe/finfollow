@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
-	"unicode/utf8"
 
+	"juniormayhe.com/finfollow/pkg/forms"
 	"juniormayhe.com/finfollow/pkg/models"
 )
 
@@ -153,6 +151,8 @@ func (app *application) addAssetForm(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte("Create a new asset..."))
 	app.renderTemplate(w, r, "create.page.gohtml", &templateData{
 		Now: time.Now().Format("2006-01-02"),
+		// Pass a new empty forms.Form object to the template.
+		Form: forms.New(nil),
 	})
 }
 
@@ -197,71 +197,91 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
+
+	// Create a new forms.Form struct containing the POSTed data from the
+	// form, then use the validation methods to check the content.
+	form := forms.New(r.PostForm)
+	form.Required("name", "value", "currency", "custody", "created")
+	form.MaxLength("name", 100)
+	form.ValidNumber("value")
+	form.MaxLength("currency", 10)
+	form.MaxLength("custody", 50)
+	// form.PermittedValues("expires", "365", "7", "1")
+
+	// If the form isn't valid, redisplay the template passing in the
+	// form.Form object as the data.
+	if !form.Valid() {
+		app.renderTemplate(w, r, "create.page.gohtml", &templateData{
+			Now:  time.Now().Format("2006-01-02"),
+			Form: form})
+		return
+	}
+
 	// Use the r.PostForm.Get() method to retrieve the relevant data fields
 	// from the r.PostForm map.
-	name := strings.TrimSpace(r.PostForm.Get("name"))
-	value, errValue := strconv.ParseFloat(strings.TrimSpace(r.PostForm.Get("value")), 64)
-	currency := strings.TrimSpace(r.PostForm.Get("currency"))
-	custody := strings.TrimSpace(r.PostForm.Get("custody"))
-	created := time.Now()
+	// name := strings.TrimSpace(r.PostForm.Get("name"))
+	// value, errValue := strconv.ParseFloat(strings.TrimSpace(r.PostForm.Get("value")), 64)
+	// currency := strings.TrimSpace(r.PostForm.Get("currency"))
+	// custody := strings.TrimSpace(r.PostForm.Get("custody"))
+	// created := time.Now()
 
 	finished, _ := time.Parse("YYYY-MM-DD", "0001-01-01")
 	active := true
 
 	// Initialize a map to hold any validation errors.
-	errors := make(map[string]string)
-	if name == "" {
-		errors["name"] = "Please enter a name"
-	} else if utf8.RuneCountInString(name) > 100 {
-		errors["name"] = "The name is too long (maximum is 100 characters)"
-	}
+	//errors := make(map[string]string)
+	// if name == "" {
+	// 	errors["name"] = "Please enter a name"
+	// } else if utf8.RuneCountInString(name) > 100 {
+	// 	errors["name"] = "The name is too long (maximum is 100 characters)"
+	// }
 
-	if r.PostForm.Get("value") == "" {
-		errors["value"] = "Value is required"
-	} else if value < 0 {
-		errors["value"] = "Please enter a value greater or equal to 0"
-	} else if errValue != nil {
-		errors["value"] = "Value is invalid"
-	}
+	// if r.PostForm.Get("value") == "" {
+	// 	errors["value"] = "Value is required"
+	// } else if value < 0 {
+	// 	errors["value"] = "Please enter a value greater or equal to 0"
+	// } else if errValue != nil {
+	// 	errors["value"] = "Value is invalid"
+	// }
 
-	if currency == "" {
-		errors["currency"] = "Please enter a currency"
-	} else if utf8.RuneCountInString(name) > 10 {
-		errors["currency"] = "The currency is too long (maximum is 10 characters)"
-	}
+	// if currency == "" {
+	// 	errors["currency"] = "Please enter a currency"
+	// } else if utf8.RuneCountInString(name) > 10 {
+	// 	errors["currency"] = "The currency is too long (maximum is 10 characters)"
+	// }
 
-	if custody == "" {
-		errors["custody"] = "Please enter a custody"
-	} else if utf8.RuneCountInString(name) > 50 {
-		errors["custody"] = "The custody is too long (maximum is 50 characters)"
-	}
+	// if custody == "" {
+	// 	errors["custody"] = "Please enter a custody"
+	// } else if utf8.RuneCountInString(name) > 50 {
+	// 	errors["custody"] = "The custody is too long (maximum is 50 characters)"
+	// }
 
-	var errCreated error = nil
-	if r.PostForm.Get("created") == "" {
-		errors["created"] = "Please enter a date"
-	} else {
+	// var errCreated error = nil
+	// if r.PostForm.Get("created") == "" {
+	// 	errors["created"] = "Please enter a date"
+	// } else {
 
-		// 2006-01-02 layout has constants standing for long year 2006, zero month 01, zero day 02
-		created, errCreated = time.ParseInLocation("2006-01-02", strings.TrimSpace(r.PostForm.Get("created")), time.UTC)
+	// 	// 2006-01-02 layout has constants standing for long year 2006, zero month 01, zero day 02
+	// 	created, errCreated = time.ParseInLocation("2006-01-02", strings.TrimSpace(r.PostForm.Get("created")), time.UTC)
 
-		if errCreated != nil {
-			errors["custody"] = "Date format is invalid"
-		}
-	}
+	// 	if errCreated != nil {
+	// 		errors["custody"] = "Date format is invalid"
+	// 	}
+	// }
 
 	// If there are any errors, dump them in a plain text HTTP response and ret
 	// from the handler.
-	if len(errors) > 0 {
-		// fmt.Fprint(w, errors)
-		app.renderTemplate(w, r, "create.page.gohtml", &templateData{
-			FormErrors: errors,
-			FormData:   r.PostForm,
-		})
+	// if len(errors) > 0 {
+	// 	// fmt.Fprint(w, errors)
+	// 	app.renderTemplate(w, r, "create.page.gohtml", &templateData{
+	// 		FormErrors: errors,
+	// 		FormData:   r.PostForm,
+	// 	})
 
-		return
-	}
+	// 	return
+	// }
 
-	id, dbErr := app.model.Insert("wander", name, value, currency, custody, created, finished, active)
+	id, dbErr := app.model.Insert("wander", form.Get("name"), form.GetNumber("value"), form.Get("currency"), form.Get("custody"), form.GetDate("created"), finished, active)
 
 	//w.Write([]byte("SHOW asset..."))
 	if dbErr != nil {
@@ -271,7 +291,7 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.infoLog.Printf("Added asset with id = %s", id)
-	_, balanceErr := app.model.UpdateBalance("wander", value)
+	_, balanceErr := app.model.UpdateBalance("wander", form.GetNumber("value"))
 	if balanceErr != nil {
 		app.serverError(w, balanceErr)
 		return
