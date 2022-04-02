@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"juniormayhe.com/finfollow/pkg/models"
 )
@@ -198,33 +199,58 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// from the r.PostForm map.
 	name := strings.TrimSpace(r.PostForm.Get("name"))
 	value, errValue := strconv.ParseFloat(strings.TrimSpace(r.PostForm.Get("value")), 64)
-	if errValue != nil {
-		app.infoLog.Printf("Error parsing value: %s", errValue)
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
 
 	currency := strings.TrimSpace(r.PostForm.Get("currency"))
 	custody := strings.TrimSpace(r.PostForm.Get("custody"))
 	created := time.Now()
 
-	app.infoLog.Printf("%v\n", created.Location())
+	finished, _ := time.Parse("YYYY-MM-DD", "0001-01-01")
+	active := true
+
+	// Initialize a map to hold any validation errors.
+	errors := make(map[string]string)
+	if name == "" {
+		errors["name"] = "Please enter a name"
+	} else if utf8.RuneCountInString(name) > 100 {
+		errors["name"] = "The name is too long (maximum is 100 characters)"
+	}
+
+	if value < 0 {
+		errors["value"] = "Please enter a value greater or equal to 0"
+	}
+	if errValue != nil {
+		errors["value"] = "Value is invalid"
+	}
+
+	if currency == "" {
+		errors["currency"] = "Please enter a currency"
+	} else if utf8.RuneCountInString(name) > 10 {
+		errors["currency"] = "The currency is too long (maximum is 10 characters)"
+	}
+
+	if custody == "" {
+		errors["custody"] = "Please enter a custody"
+	} else if utf8.RuneCountInString(name) > 50 {
+		errors["custody"] = "The custody is too long (maximum is 50 characters)"
+	}
 
 	var errCreated error = nil
 	if len(r.PostForm.Get("created")) > 0 {
 
 		// 2006-01-02 layout has constants standing for long year 2006, zero month 01, zero day 02
 		created, errCreated = time.ParseInLocation("2006-01-02", strings.TrimSpace(r.PostForm.Get("created")), time.UTC)
-		app.infoLog.Printf("%v\n", created.Location())
+
 		if errCreated != nil {
-			app.infoLog.Printf("Error parsing created date: %s", errCreated)
-			app.clientError(w, http.StatusBadRequest)
-			return
+			errors["custody"] = "Date format is invalid"
 		}
 	}
 
-	finished, _ := time.Parse("YYYY-MM-DD", "0001-01-01")
-	active := true
+	// If there are any errors, dump them in a plain text HTTP response and ret
+	// from the handler.
+	if len(errors) > 0 {
+		fmt.Fprint(w, errors)
+		return
+	}
 
 	id, dbErr := app.model.Insert("wander", name, value, currency, custody, created, finished, active)
 
