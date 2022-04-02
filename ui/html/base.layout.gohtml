@@ -19,6 +19,9 @@
         <a href='/asset/add'>Add asset</a>
     </nav>
     <section>
+        {{with .Flash}}
+        <div class='flash '>{{.}}</div>
+        {{end}}
         {{template "body" .}}
     </section>
 

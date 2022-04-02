@@ -41,6 +41,16 @@ Router to deal with method based routing and clean urls, not maintained. We coul
 go get github.com/bmizerany/pat
 ```
 
+Session manager
+
+Encrypted / authenticated cookie-based session store. Load and save via middleware. Stores up to 4KB.
+```
+go get github.com/golangcollege/sessions
+```
+We could use others like
+- https://github.com/gorilla/sessions (better wait version 2 for memory leak fix and renewable session token)
+- https://github.com/alexedwards/scs (load and save data via middleware)
+
 ## Create Google service account
 
 [Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)

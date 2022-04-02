@@ -40,7 +40,7 @@ func (m *FirestoreModel) Get(username string, id string) (*models.Asset, error) 
 		return nil, models.ErrNoRecord
 	}
 
-	// Initialize a pointer to a new zeroed Snippet struct.
+	// Initialize a pointer to a new zeroed asset struct.
 	asset := &models.Asset{}
 	asset.Id = ds.Ref.ID
 	ds.DataTo(&asset)

@@ -33,8 +33,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Fprintf(w, "%+v\n", asset)
 	// }
 
-	// Create an instance of a templateData struct holding the slice of
-	// snippets.
+	// Create an instance of a templateData struct holding the slice of assets
 	data := &templateData{Assets: assets}
 
 	// Initialize a slice containing the paths to the two files. Note that the
@@ -113,7 +112,16 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := &templateData{Asset: asset}
+	// Use the PopString() method to retrieve the value for the "flash" key.
+	// PopString() also deletes the key and value from the session data, so it
+	// acts like a one-time fetch. If there is no matching key in the session
+	// data this will return the empty string.
+	flash := app.session.PopString(r, "flash")
+
+	data := &templateData{
+		Asset: asset,
+		Flash: flash,
+	}
 
 	// Initialize a slice containing the paths to the show.page.tmpl file,
 	// plus the base layout and footer partial that we made earlier.
@@ -131,7 +139,7 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	// And then execute them. Notice how we are passing in the snippet
-	// data (a models.Snippet struct) as the final parameter.
+	// data (a models.Asset struct) as the final parameter.
 	// err = ts.Execute(w, asset)
 	// Pass in the templateData struct when executing the template.
 	// err = ts.Execute(w, data)
@@ -299,9 +307,16 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 
 	// w.Write([]byte("ADD asset..."))
 
+	// Use the Put() method to add a string value ("Your asset was saved
+	// successfully!") and the corresponding key ("flash") to the session
+	// data. Note that if there's no existing session for the current user
+	// (or their session has expired) then a new, empty, session for them
+	// will automatically be created by the session middleware.
+	app.session.Put(r, "flash", "Asset successfully added!")
+
 	// Redirect the user to the relevant page for the asset.
 	// http.Redirect(w, r, fmt.Sprintf("/asset?id=%v", id), http.StatusSeeOther)
 
-	// Change the redirect to use the new semantic URL style of /snippet/:id
+	// Change the redirect to use the new semantic URL style of /asset/:id
 	http.Redirect(w, r, fmt.Sprintf("/asset/%s", id), http.StatusSeeOther)
 }

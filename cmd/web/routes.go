@@ -16,6 +16,11 @@ func (app *application) routes() http.Handler {
 	// which will be used for every request our application receives.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
+	// Create a new middleware chain containing the middleware specific to
+	// our dynamic application routes. For now, this chain will only contain
+	// the session middleware but we'll add more to it later.
+	dynamicMiddleware := alice.New(app.session.Enable)
+
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	// mux := http.NewServeMux()
@@ -25,10 +30,16 @@ func (app *application) routes() http.Handler {
 	// since native Go doesnt support method based routing (GET, POST,..)
 	// and doesn't support clean URLs, we need to use a custom router
 	mux := pat.New()
-	mux.Get("/", http.HandlerFunc(app.home))
-	mux.Get("/asset/add", http.HandlerFunc(app.addAssetForm))
-	mux.Post("/asset/add", http.HandlerFunc(app.addAsset))
-	mux.Get("/asset/:id", http.HandlerFunc(app.showAsset)) // Moved down to give preference to exact match route before wildcard route
+	// mux.Get("/", http.HandlerFunc(app.home))
+	// mux.Get("/asset/add", http.HandlerFunc(app.addAssetForm))
+	// mux.Post("/asset/add", http.HandlerFunc(app.addAsset))
+	// mux.Get("/asset/:id", http.HandlerFunc(app.showAsset)) // Moved down to give preference to exact match route before wildcard route
+	// Update these routes to use the new dynamic middleware chain followed
+	// by the appropriate handler function.
+	mux.Get("/", dynamicMiddleware.ThenFunc(app.home)) // without alice: mux.Get("/", app.session.Enable(http.HandlerFunc(app.home)))
+	mux.Get("/asset/add", dynamicMiddleware.ThenFunc(app.addAssetForm))
+	mux.Post("/asset/add", dynamicMiddleware.ThenFunc(app.addAsset))
+	mux.Get("/asset/:id", dynamicMiddleware.ThenFunc(app.showAsset))
 
 	// Create a file server which serves files out of the "./ui/static" directo
 	// Note that the path given to the http.Dir function is relative to the pro

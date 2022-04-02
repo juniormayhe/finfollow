@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/golangcollege/sessions"
 	"juniormayhe.com/finfollow/pkg/firestoredb"
 )
 
@@ -18,6 +20,7 @@ import (
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session       *sessions.Session
 	model         *firestoredb.FirestoreModel
 	templateCache map[string]*template.Template
 }
@@ -29,6 +32,11 @@ func main() {
 	// flag will be stored in the addr variable at runtime.
 	// go run cmd/web/* -addr=":9999"
 	addr := flag.String("addr", ":4000", "HTTP network address")
+
+	// Define a new command-line flag for the session secret (a random key whic
+	// will be used to encrypt and authenticate session cookies). It should be
+	// bytes long.
+	secret := flag.String("secret", " L’èxit és dependent de l’esforç", "Secret key")
 
 	// Importantly, we use the flag.Parse() function to parse the command-line
 	// This reads in the command-line flag value and assigns it to the addr
@@ -60,10 +68,17 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Use the sessions.New() function to initialize a new session manager,
+	// passing in the secret key as the parameter. Then we configure it so
+	// sessions always expires after 12 hours.
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	// Initialize a new instance of application containing the dependencies.
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		session:       session,
 		model:         &firestoredb.FirestoreModel{Client: client},
 		templateCache: templateCache,
 	}
