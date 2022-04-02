@@ -4,23 +4,38 @@
 <form action='/asset/add' method='POST'>
     <div>
         <label>Name:</label>
+        {{with .FormErrors.name}}
+        <label class='error'>{{.}}</label>
+        {{end}}
         <input type='text' name='name'>
     </div>
     <div>
         <label>Value:</label>
+        {{with .FormErrors.value}}
+        <label class='error'>{{.}}</label>
+        {{end}}
         <input type='number' name='value'>
     </div>
     <div>
         <label>Currency:</label>
+        {{with .FormErrors.currency}}
+        <label class='error'>{{.}}</label>
+        {{end}}
         <input type='text' name='currency'>
     </div>
     <div>
         <label>Custody:</label>
+        {{with .FormErrors.custody}}
+        <label class='error'>{{.}}</label>
+        {{end}}
         <input type='text' name='custody'>
     </div>
     <div>
         <label>Created:</label>
-        <input type='date' name='created'>
+        {{with .FormErrors.created}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='date' name='created' value='{{.Now}}'>
     </div>
     {{/* <div>
         <label>Active:</label>

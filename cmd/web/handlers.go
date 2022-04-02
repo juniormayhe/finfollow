@@ -148,10 +148,12 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Add a new createSnippetForm handler, which for now returns a placeholder res
+// Add a new addAssetForm handler, which for now returns a placeholder res
 func (app *application) addAssetForm(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte("Create a new asset..."))
-	app.renderTemplate(w, r, "create.page.gohtml", nil)
+	app.renderTemplate(w, r, "create.page.gohtml", &templateData{
+		Now: time.Now().Format("2006-01-02"),
+	})
 }
 
 // Add a addAsset handler function.
@@ -199,7 +201,6 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// from the r.PostForm map.
 	name := strings.TrimSpace(r.PostForm.Get("name"))
 	value, errValue := strconv.ParseFloat(strings.TrimSpace(r.PostForm.Get("value")), 64)
-
 	currency := strings.TrimSpace(r.PostForm.Get("currency"))
 	custody := strings.TrimSpace(r.PostForm.Get("custody"))
 	created := time.Now()
@@ -215,10 +216,11 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 		errors["name"] = "The name is too long (maximum is 100 characters)"
 	}
 
-	if value < 0 {
+	if r.PostForm.Get("value") == "" {
+		errors["value"] = "Value is required"
+	} else if value < 0 {
 		errors["value"] = "Please enter a value greater or equal to 0"
-	}
-	if errValue != nil {
+	} else if errValue != nil {
 		errors["value"] = "Value is invalid"
 	}
 
@@ -235,7 +237,9 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var errCreated error = nil
-	if len(r.PostForm.Get("created")) > 0 {
+	if r.PostForm.Get("created") == "" {
+		errors["created"] = "Please enter a date"
+	} else {
 
 		// 2006-01-02 layout has constants standing for long year 2006, zero month 01, zero day 02
 		created, errCreated = time.ParseInLocation("2006-01-02", strings.TrimSpace(r.PostForm.Get("created")), time.UTC)
@@ -248,7 +252,12 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// If there are any errors, dump them in a plain text HTTP response and ret
 	// from the handler.
 	if len(errors) > 0 {
-		fmt.Fprint(w, errors)
+		// fmt.Fprint(w, errors)
+		app.renderTemplate(w, r, "create.page.gohtml", &templateData{
+			FormErrors: errors,
+			FormData:   r.PostForm,
+		})
+
 		return
 	}
 
