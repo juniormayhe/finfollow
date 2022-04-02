@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"html/template"
 	"log"
@@ -83,6 +84,13 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	// Initialize a tls.Config struct to hold the non-default TLS settings we w
+	// the server to use.
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,                                     // tell the HTTPS connection to use Go’s strong cipher suites instead of the user’s favored cipher suites
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256}, //  keep server performant under heavy loads by using the most elliptic secure curves. the order sets the preferred curve.
+	}
+
 	// We also defer a call to client.Close(), so that the connection is closed
 	// before the main() function exits
 	defer client.Close()
@@ -91,10 +99,17 @@ func main() {
 	// that the server uses the same network address and routes as before, and
 	// the ErrorLog field so that the server now uses the custom errorLog logge
 	// the event of any problems.
+	// this settings apply to all requests irrespective of their handler or URL.
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(), // gets ServeMux from routes()
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(), // gets ServeMux from routes()
+		TLSConfig: tlsConfig,
+		// Add Idle, Read and Write timeouts to the server.
+		IdleTimeout:  time.Minute,      // tells go to close idle connections after 1 minute instead of using Go's default of 3 minutes. a new handshake is required to establish a new connection increasing latency.
+		ReadTimeout:  5 * time.Second,  // go closes connection if the request header or body takes longer than 5 seconds to read. Mitigate DoS client attacks avoding client to keep connections open as long as possible. if you set a ReadTimeout and don't set IdleTimeout, the IdleTimeout will use the same duration of ReadTimeout.
+		WriteTimeout: 10 * time.Second, // if data is being written more than 10 seconds go closes connection. generally greater than ReadTimeout. prevents data that the handler returns from taking too long to write to the connection.
+
 	}
 
 	// Use the http.ListenAndServe() function to start a new web server. We pas
