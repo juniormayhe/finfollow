@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"juniormayhe.com/finfollow/pkg/models"
@@ -174,20 +176,65 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	name := "Polygon"
-	value := float32(8.2)
-	currency := "MATIC"
-	custody := "Metamask"
+	// name := "Polygon"
+	// value := float64(8.2)
+	// currency := "MATIC"
+	// custody := "Metamask"
+	// created := time.Now()
+	//
+	//
+
+	// First we call r.ParseForm() which adds any data in POST request bodies
+	// to the r.PostForm map. This also works in the same way for PUT and PATCH
+	// requests. If there are any errors, we use our app.ClientError helper to
+	// a 400 Bad Request response to the user.
+	err := r.ParseForm()
+	if err != nil {
+		app.infoLog.Println("Error parsing form")
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	// Use the r.PostForm.Get() method to retrieve the relevant data fields
+	// from the r.PostForm map.
+	name := strings.TrimSpace(r.PostForm.Get("name"))
+	value, errValue := strconv.ParseFloat(strings.TrimSpace(r.PostForm.Get("value")), 64)
+	if errValue != nil {
+		app.infoLog.Printf("Error parsing value: %s", errValue)
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	currency := strings.TrimSpace(r.PostForm.Get("currency"))
+	custody := strings.TrimSpace(r.PostForm.Get("custody"))
 	created := time.Now()
-	finished, _ := time.Parse("YYYY-MM-DD", "1980-01-01")
+
+	app.infoLog.Printf("%v\n", created.Location())
+
+	var errCreated error = nil
+	if len(r.PostForm.Get("created")) > 0 {
+
+		// 2006-01-02 layout has constants standing for long year 2006, zero month 01, zero day 02
+		created, errCreated = time.ParseInLocation("2006-01-02", strings.TrimSpace(r.PostForm.Get("created")), time.UTC)
+		app.infoLog.Printf("%v\n", created.Location())
+		if errCreated != nil {
+			app.infoLog.Printf("Error parsing created date: %s", errCreated)
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+	}
+
+	finished, _ := time.Parse("YYYY-MM-DD", "0001-01-01")
 	active := true
+
 	id, dbErr := app.model.Insert("wander", name, value, currency, custody, created, finished, active)
 
 	//w.Write([]byte("SHOW asset..."))
 	if dbErr != nil {
+		app.infoLog.Printf("Error while inserting in Database: %s", dbErr)
 		app.serverError(w, dbErr)
 		return
 	}
+
 	app.infoLog.Printf("Added asset with id = %s", id)
 	_, balanceErr := app.model.UpdateBalance("wander", value)
 	if balanceErr != nil {

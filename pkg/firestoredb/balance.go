@@ -10,14 +10,14 @@ import (
 )
 
 // This update user balance in database
-func (m *FirestoreModel) UpdateBalance(username string, value float32) (bool, error) {
+func (m *FirestoreModel) UpdateBalance(username string, value float64) (bool, error) {
 
 	balance, err := m.GetBalance(username)
 	if err != nil && err != models.ErrNoRecord {
 		return false, err
 	}
 
-	var previousBalanceValue float32
+	var previousBalanceValue float64
 	if balance != nil {
 		previousBalanceValue = balance.Value
 	}

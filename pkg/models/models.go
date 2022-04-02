@@ -10,7 +10,7 @@ var ErrNoRecord = errors.New("models: no matching record found")
 type Asset struct {
 	Id       string
 	Name     string
-	Value    float32
+	Value    float64
 	Currency string
 	Custody  string
 	Created  time.Time
@@ -19,5 +19,5 @@ type Asset struct {
 }
 
 type Balance struct {
-	Value float32
+	Value float64
 }

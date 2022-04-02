@@ -12,7 +12,7 @@ import (
 )
 
 // This will insert a new asset into the database.
-func (m *FirestoreModel) Insert(username string, name string, value float32, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
+func (m *FirestoreModel) Insert(username string, name string, value float64, currency string, custody string, created time.Time, finished time.Time, active bool) (string, error) {
 
 	docRef, _, err := m.Client.Collection("accounts").Doc(username).Collection("assets").Add(context.Background(), map[string]interface{}{
 		"name":     name,
@@ -75,8 +75,8 @@ func (m *FirestoreModel) Latest(username string) ([]*models.Asset, error) {
 	return assets, nil
 }
 
-func Sum(assets []*models.Asset) float32 {
-	sum := float32(0)
+func Sum(assets []*models.Asset) float64 {
+	sum := float64(0)
 	for _, asset := range assets {
 		sum += asset.Value
 	}
