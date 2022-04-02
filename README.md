@@ -74,3 +74,9 @@ TODO:
 ```
 curl -iL -X POST http://localhost:4000/asset/add -H "Content-Type: application/json" -d '{"name":"test", "value": 50.4, "currency":  "USD", "custody": "FIAT", created: "2020-01-01", active: true}'
 ```
+
+## Self signed certificate  
+In ./tls folder run
+```
+go run '/c/Program Files/Go/src/crypto/tls/generate_cert.go' --rsa-bits=2048 --host=localhost
+```

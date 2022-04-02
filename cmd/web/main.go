@@ -104,7 +104,12 @@ func main() {
 	// log.Printf("Starting server on %s\n", *addr)
 	app.infoLog.Printf("Starting server on %s", *addr)
 	//err := http.ListenAndServe(*addr, mux) // this goes to standard logger instead of error logger
-	err = srv.ListenAndServe() // use struct error logger instead of standard logger
+	//err = srv.ListenAndServe() // use struct error logger instead of standard logger
+
+	// Use the ListenAndServeTLS() method to start the HTTPS server. We
+	// pass in the paths to the TLS certificate and corresponding private key a
+	// the two parameters.
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	// log.Fatal(err)
 	errorLog.Fatal(err)
