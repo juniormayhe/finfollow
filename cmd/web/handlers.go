@@ -116,11 +116,13 @@ func (app *application) showAsset(w http.ResponseWriter, r *http.Request) {
 	// PopString() also deletes the key and value from the session data, so it
 	// acts like a one-time fetch. If there is no matching key in the session
 	// data this will return the empty string.
-	flash := app.session.PopString(r, "flash")
+
+	// moved to helpers.go
+	// flash := app.session.PopString(r, "flash")
 
 	data := &templateData{
 		Asset: asset,
-		Flash: flash,
+		//Flash: flash, moved to helpers.go
 	}
 
 	// Initialize a slice containing the paths to the show.page.tmpl file,
