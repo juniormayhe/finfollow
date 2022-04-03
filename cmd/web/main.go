@@ -74,7 +74,7 @@ func main() {
 	// sessions always expires after 12 hours.
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
-	session.Secure = true
+	session.Secure = true // Set the Secure flag on our session cookies
 
 	// Initialize a new instance of application containing the dependencies.
 	app := &application{
