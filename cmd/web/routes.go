@@ -37,8 +37,10 @@ func (app *application) routes() http.Handler {
 	// Update these routes to use the new dynamic middleware chain followed
 	// by the appropriate handler function.
 	mux.Get("/", dynamicMiddleware.ThenFunc(app.home)) // without alice: mux.Get("/", app.session.Enable(http.HandlerFunc(app.home)))
-	mux.Get("/asset/add", dynamicMiddleware.ThenFunc(app.addAssetForm))
-	mux.Post("/asset/add", dynamicMiddleware.ThenFunc(app.addAsset))
+	// Add the requireAuthenticatedUser middleware to the chain.
+	mux.Get("/asset/add", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.addAssetForm)) // without alice: mux.Get("/", app.session.Enable(app.requireAuthenticatedUser(http.HandlerFunc(app.home))))
+	// Add the requireAuthenticatedUser middleware to the chain
+	mux.Post("/asset/add", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.addAsset))
 	mux.Get("/asset/:id", dynamicMiddleware.ThenFunc(app.showAsset))
 
 	// Add the five new routes.
@@ -48,7 +50,8 @@ func (app *application) routes() http.Handler {
 	mux.Get("/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
 	mux.Post("/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
 
-	mux.Post("/user/logout", dynamicMiddleware.ThenFunc(app.logoutUser))
+	// Add the requireAuthenticatedUser middleware to the chain.
+	mux.Post("/user/logout", dynamicMiddleware.Append(app.requireAuthenticatedUser).ThenFunc(app.logoutUser))
 
 	// Create a file server which serves files out of the "./ui/static" directo
 	// Note that the path given to the http.Dir function is relative to the pro
