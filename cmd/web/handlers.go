@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -405,11 +406,23 @@ func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
 	// Add the ID of the current user to the session, so that they are now 'logg
 	// in'.
 	app.session.Put(r, "userID", id)
+	log.Println(">>>> logged in User ID: ", id)
 
 	// Redirect the user to the create snippet page.
 	http.Redirect(w, r, "/asset/add", http.StatusSeeOther)
 
 }
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Logout the user...")
+	//fmt.Fprintln(w, "Logout the user...")
+
+	if !app.session.Exists(r, "userID") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Remove the userID from the session data so that the user is 'logged out'
+	app.session.Remove(r, "userID")
+	// Add a flash message to the session to confirm to the user that they've be
+	app.session.Put(r, "flash", "You've been logged out successfully!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

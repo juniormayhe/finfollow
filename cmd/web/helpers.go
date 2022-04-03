@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -46,6 +47,9 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td == nil {
 		td = &templateData{}
 	}
+
+	td.AuthenticatedUser = app.authenticatedUser(r)
+	log.Println(">>>> AuthenticatedUser:", td.AuthenticatedUser)
 	td.CurrentYear = time.Now().Year()
 
 	// Add the flash message to the template data, if one exists.
@@ -91,4 +95,10 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, n
 	// takes an io.Writer.
 	buf.WriteTo(w)
 
+}
+
+// The authenticatedUser method returns the ID of the current user from the
+// session, or zero if the request is from an unauthenticated user.
+func (app *application) authenticatedUser(r *http.Request) string {
+	return app.session.GetString(r, "userID")
 }

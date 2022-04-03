@@ -14,10 +14,11 @@ import (
 // At the moment it only contains one field, but we'll add more
 // to it as the build progresses.
 type templateData struct {
-	CurrentYear int
-	Now         string // date in YYYY-MM-DD format
-	Form        *forms.Form
-	Flash       string
+	AuthenticatedUser string
+	CurrentYear       int
+	Now               string // date in YYYY-MM-DD format
+	Form              *forms.Form
+	Flash             string
 	//FormData    url.Values        // render previously submitted data. url.Values has the same underlying type of r.PostForm
 	//FormErrors  map[string]string // to hold any validation errors to render in page
 	Asset  *models.Asset
