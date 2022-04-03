@@ -324,10 +324,56 @@ func (app *application) addAsset(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Display the user signup form...")
+	app.renderTemplate(w, r, "signup.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
 }
 func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Create a new user...")
+	// Parse the form data.
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Validate the form contents using the form helper we made earlier.
+	form := forms.New(r.PostForm)
+	form.Required("name", "email", "password", "confirm_password")
+	form.MatchesPattern("email", forms.EmailRX)
+	form.MinLength("password", 5)
+	form.AreEqual("password", "confirm_password")
+
+	// If there are any errors, redisplay the signup form.
+	if !form.Valid() {
+		app.renderTemplate(w, r, "signup.page.gohtml", &templateData{Form: form})
+		return
+	}
+	// Otherwise send a placeholder response (for now!).
+	// fmt.Fprintln(w, "Create a new user...")
+
+	// Try to create a new user record in the database. If the email already exi
+	// add an error message to the form and re-display it.
+	id, dbErr := app.model.InsertUser(form.Get("name"), form.Get("email"), form.Get("password"))
+
+	if dbErr == models.ErrDuplicateEmail {
+		form.Errors.Add("email", "Address is already in use")
+		app.renderTemplate(w, r, "signup.page.gohtml", &templateData{Form: form})
+		return
+	} else if dbErr != nil {
+		app.infoLog.Printf("Error while inserting user in Database: %s", dbErr)
+		app.serverError(w, dbErr)
+		return
+	}
+
+	// Otherwise add a confirmation flash message to the session confirming tha
+	// their signup worked and asking them to log in.
+	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
+
+	// And redirect the user to the login page.
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+
+	app.infoLog.Printf("Added user with id = %s", id)
+
 }
 func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Display the user login form...")

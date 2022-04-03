@@ -3,11 +3,20 @@ package forms
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 )
+
+// Use the regexp.MustCompile() function to parse a pattern and compile a
+// regular expression for sanity checking the format of an email address.
+// This returns a *regexp.Regexp object, or panics in the event of an error.
+// Doing this once at runtime, and storing the compiled regular expression
+// object in a variable, is more performant than re-compiling the pattern with
+// every request.
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // Create a custom Form struct, which anonymously embeds a url.Values object
 // (to hold the form data) and an Errors field to hold any validation errors
@@ -71,6 +80,29 @@ func (f *Form) GetNumber(field string) float64 {
 	return value
 }
 
+// check if fields match
+func (f *Form) AreEqual(field1 string, field2 string) {
+	value1 := f.Get(field1)
+	value2 := f.Get(field2)
+
+	if value1 != value2 {
+		f.Errors.Add(field2, fmt.Sprintf("The should %q match %q", strings.Replace(field1, "_", " ", -1), strings.Replace(field2, "_", " ", -1)))
+	}
+}
+
+// Implement a MinLength method to check that a specific field in the form
+// contains a minimum number of characters. If the check fails then add the
+// appropriate message to the form errors.
+func (f *Form) MinLength(field string, d int) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if utf8.RuneCountInString(value) < d {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
+	}
+}
+
 // Implement a MaxLength method to check that a specific field in the form
 // contains a maximum number of characters. If the check fails then add the
 // appropriate message to the form errors.
@@ -82,6 +114,19 @@ func (f *Form) MaxLength(field string, d int) {
 
 	if utf8.RuneCountInString(value) > d {
 		f.Errors.Add(field, fmt.Sprintf("This field is too long (maximum is %d characters)", d))
+	}
+}
+
+// Implement a MatchesPattern method to check that a specific field in the form
+// matches a regular expression. If the check fails then add the
+// appropriate message to the form errors.
+func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if !pattern.MatchString(value) {
+		f.Errors.Add(field, "This field is invalid")
 	}
 }
 

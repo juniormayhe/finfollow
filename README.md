@@ -51,6 +51,13 @@ We could use others like
 - https://github.com/gorilla/sessions (better wait version 2 for memory leak fix and renewable session token)
 - https://github.com/alexedwards/scs (load and save data via middleware)
 
+## Password handling
+
+Saving passwords with bcrypt implementation, available in golang.org/x/crypto package installed along with golangcollege/sessions.
+
+4096 (2^12) bcrypt iterations will be used to hash the password, returning a 60-character long hash.
+
+
 ## Create Google service account
 
 [Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)

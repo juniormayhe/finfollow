@@ -1,0 +1,40 @@
+{{template "base" .}}
+{{define "title"}}Sign up{{end}}
+{{define "body"}}
+<form action='/user/signup' method='POST'>
+    
+    <div>
+        <label>Name:</label>
+        {{with .Form.Errors.Get "name"}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        {{/* {{with .Form.Get "name"}} */}}
+        <input type='text' name='name' value='{{.Form.Get "name"}}'>
+        {{/* {{end}} */}}
+    </div>
+    <div>
+        <label>Email:</label>
+        {{with .Form.Errors.Get "email"}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='email' name='email' value='{{.Form.Get "email"}}'>
+    </div>
+    <div>
+        <label>Password:</label>
+        {{with .Form.Errors.Get "password"}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='password' name='password'>
+    </div>
+    <div>
+        <label>Confirm Password:</label>
+        {{with .Form.Errors.Get "confirm_password"}}
+        <label class='error'>{{.}}</label>
+        {{end}}
+        <input type='password' name='confirm_password'>
+    <div>
+        <input type='submit' value='Signup'>
+    </div>
+    
+</form>
+{{end}}
