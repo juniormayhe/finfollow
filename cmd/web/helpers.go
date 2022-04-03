@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/justinas/nosurf"
 )
 
 // The serverError helper writes an error message and stack trace to the errorLogger
@@ -55,6 +57,9 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	// Add the flash message to the template data, if one exists.
 	// message is automatically included the next time any page is rendered
 	td.Flash = app.session.PopString(r, "flash")
+
+	// Add the CSRF token to the templateData struct.
+	td.CSRFToken = nosurf.Token(r)
 
 	return td
 }

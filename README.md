@@ -17,6 +17,7 @@ go run cmd/web/* >>/tmp/info.log 2>>/tmp/error.log
 
 # Dependencies
 
+## Database
 [Setup Firebase](https://firebase.google.com/docs/firestore/quickstart#go)
 ```
 go get firebase.google.com/go
@@ -27,7 +28,7 @@ or update
 go get -u firebase.google.com/go
 ```
 
-Composable middleware
+## Composable middleware
 ```
 go get github.com/justinas/alice
 ```
@@ -41,7 +42,7 @@ Router to deal with method based routing and clean urls, not maintained. We coul
 go get github.com/bmizerany/pat
 ```
 
-Session manager
+## Session manager
 
 Encrypted / authenticated cookie-based session store. Load and save via middleware. Stores up to 4KB.
 ```
@@ -57,6 +58,16 @@ Saving passwords with bcrypt implementation, available in golang.org/x/crypto pa
 
 4096 (2^12) bcrypt iterations will be used to hash the password, returning a 60-character long hash.
 
+## CSRF protection
+
+Since SameSite=Strict may not work in all browsers, we
+can use a 3rd-party package to generate a random a CSRF token as cookie and added to a hidden field.
+```
+go get github.com/justinas/nosurf
+```
+
+Alternative
+- https://github.com/gorilla/csrf
 
 ## Create Google service account
 

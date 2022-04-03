@@ -15,6 +15,7 @@ import (
 // to it as the build progresses.
 type templateData struct {
 	AuthenticatedUser string
+	CSRFToken         string // we use nosurf.Token() to add crsf token to a hidden field
 	CurrentYear       int
 	Now               string // date in YYYY-MM-DD format
 	Form              *forms.Form

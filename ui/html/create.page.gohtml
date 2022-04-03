@@ -2,7 +2,8 @@
 {{define "title"}}Add an asset {{end}}
 {{define "body"}}
 <form action='/asset/add' method='POST'>
-    
+    <!-- Include the CSRF token -->
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
     <div>
         <label>Name:</label>
         {{with .Form.Errors.Get "name"}}
