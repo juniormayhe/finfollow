@@ -4,6 +4,29 @@
 go run cmd/web/*
 ```
 
+Run web server without excluding test files, enable globbling in bash
+```
+shopt -s extglob
+go run cmd/web/!(*_test).go
+```
+
+# Testing
+
+Run tests with verbose mode
+```
+go test -v cmd/web/*
+```
+
+Stop test running after first failure
+```
+go test -failfast -v cmd/web/*
+```
+
+Run all tests starting from current folder
+```
+go test ./...
+```
+
 ## Use arguments
 ```
 go run cmd/web/* -help
