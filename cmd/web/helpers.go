@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/justinas/nosurf"
+	"juniormayhe.com/finfollow/pkg/models"
 )
 
 // The serverError helper writes an error message and stack trace to the errorLogger
@@ -104,6 +105,17 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, n
 
 // The authenticatedUser method returns the ID of the current user from the
 // session, or zero if the request is from an unauthenticated user.
-func (app *application) authenticatedUser(r *http.Request) string {
-	return app.session.GetString(r, "userID")
+// func (app *application) authenticatedUser(r *http.Request) string {
+// 	return app.session.GetString(r, "userID")
+// }
+
+func (app *application) authenticatedUser(r *http.Request) *models.User {
+	// after retrieving user as interface{} from the context,
+	// assert them to their original type
+	user, ok := r.Context().Value(contextKeyUser).(*models.User)
+	if !ok {
+		// not authenticated user
+		return nil
+	}
+	return user
 }

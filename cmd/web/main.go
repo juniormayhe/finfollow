@@ -15,6 +15,11 @@ import (
 	"juniormayhe.com/finfollow/pkg/firestoredb"
 )
 
+//  a unique key we can use to store and retrieve the user details from request context.
+type contextKey string
+
+var contextKeyUser = contextKey("user")
+
 // Define an application struct to hold the application-wide dependencies for t
 // web application. For now we'll only include fields for the two custom logger
 // we'll add more to it as the build progresses.

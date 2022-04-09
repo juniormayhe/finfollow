@@ -14,7 +14,8 @@ import (
 // At the moment it only contains one field, but we'll add more
 // to it as the build progresses.
 type templateData struct {
-	AuthenticatedUser string
+	//AuthenticatedUser string // userID
+	AuthenticatedUser *models.User
 	CSRFToken         string // we use nosurf.Token() to add crsf token to a hidden field
 	CurrentYear       int
 	Now               string // date in YYYY-MM-DD format

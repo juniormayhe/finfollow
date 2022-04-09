@@ -21,7 +21,9 @@ func (app *application) routes() http.Handler {
 	// the session middleware but we'll add more to it later.
 	//dynamicMiddleware := alice.New(app.session.Enable)
 	// Use the nosurf middleware on all our 'dynamic' routes.
-	dynamicMiddleware := alice.New(app.session.Enable, noSurf)
+	//dynamicMiddleware := alice.New(app.session.Enable, noSurf)
+	// Add the authenticate() middleware to the chain.
+	dynamicMiddleware := alice.New(app.session.Enable, noSurf, app.authenticate)
 
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
