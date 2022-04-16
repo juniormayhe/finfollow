@@ -10,6 +10,10 @@ import (
 	"juniormayhe.com/finfollow/pkg/models"
 )
 
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 // Define a home handler function to render home page
 // we inject dependencies into handler passing the application struct value
 func (app *application) home(w http.ResponseWriter, r *http.Request) {

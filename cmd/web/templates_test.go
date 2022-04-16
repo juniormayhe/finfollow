@@ -7,6 +7,8 @@ import (
 )
 
 func TestHumanDate(t *testing.T) {
+	//test will be run in parallel only with other parallel tests.
+	t.Parallel()
 
 	// Create a slice of anonymous structs containing the test case name,
 	// input to our humanDate() function (the tm field), and expected output

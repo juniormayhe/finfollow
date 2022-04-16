@@ -1,3 +1,17 @@
+## Create Google service account
+
+[Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)
+
+[Create service owner account](https://console.cloud.google.com/iam-admin/iam?project=finfollow-app&supportedpurview=project)
+
+[Add JSON key to service account](https://console.cloud.google.com/iam-admin/serviceaccounts?project=finfollow-app&supportedpurview=project)
+
+add path to environment variable
+```
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/jsonkey"
+export GOOGLE_APPLICATION_CREDENTIALS="/c/Users/junio/OneDrive/Outros Documentos/finfollow-app-6341c1702a75.json"
+```
+
 # Run web and handlers
 
 ```
@@ -22,9 +36,29 @@ Stop test running after first failure
 go test -failfast -v cmd/web/*
 ```
 
+Run a specific test
+```
+go test -v -run="^TestPing$" ./cmd/web
+```
+
+Run a specific test with subtests
+```
+go test -v -run="^TestHumanDate$/^UTC|CET$" ./cmd/web
+```
+
 Run all tests starting from current folder
 ```
 go test ./...
+```
+
+Run tests in cmd/web folder
+```
+go test ./cmd/web/
+```
+
+Run maximum of 4 tests in parallel in all folders
+```
+go test -parallel 4 ./...
 ```
 
 ## Use arguments
@@ -91,20 +125,6 @@ go get github.com/justinas/nosurf
 
 Alternative
 - https://github.com/gorilla/csrf
-
-## Create Google service account
-
-[Create IAM & Admin](https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-go)
-
-[Create service owner account](https://console.cloud.google.com/iam-admin/iam?project=finfollow-app&supportedpurview=project)
-
-[Add JSON key to service account](https://console.cloud.google.com/iam-admin/serviceaccounts?project=finfollow-app&supportedpurview=project)
-
-add path to environment variable
-```
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/jsonkey"
-export GOOGLE_APPLICATION_CREDENTIALS="/c/Users/junio/OneDrive/Outros Documentos/finfollow-app-6341c1702a75.json"
-```
 
 ## Methods
 ```
